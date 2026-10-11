@@ -1136,7 +1136,7 @@
 
       // Offline support + install
       if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-        window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+        window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(function () {}); });
       }
     }());
   </script>

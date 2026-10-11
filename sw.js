@@ -1,5 +1,5 @@
 // Bump this version whenever you change index.html so installed copies update.
-var CACHE = "mood-log-v2";
+var CACHE = "mood-log-v3";
 var APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", function (event) {
@@ -34,7 +34,8 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  event.respondWith(fetch(req).then(function (res) {
+  // "no-cache" makes the browser check GitHub for a newer version instead of reusing a stale copy
+  event.respondWith(fetch(req, { cache: "no-cache" }).then(function (res) {
     var copy = res.clone();
     caches.open(CACHE).then(function (cache) { cache.put(req, copy); });
     return res;
