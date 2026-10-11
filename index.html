@@ -31,6 +31,13 @@
       --celestial: #273d49;
       --focus: #b8604d;
       --shadow: 0 22px 70px rgba(49, 42, 32, .12);
+      /* Nervous system states */
+      --safe: #4f7a5a;
+      --safe-soft: #dde8dc;
+      --mobilized: #b0702a;
+      --mobilized-soft: #f2e1cb;
+      --shutdown: #4d6a8c;
+      --shutdown-soft: #dde4ee;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -45,10 +52,17 @@
         --celestial: #b8ccd4;
         --focus: #f1ae9e;
         --shadow: 0 24px 80px rgba(0, 0, 0, .35);
+        --safe: #8fc49b;
+        --safe-soft: #1d2b23;
+        --mobilized: #e6aa63;
+        --mobilized-soft: #33271a;
+        --shutdown: #98b3d6;
+        --shutdown-soft: #1c2433;
       }
     }
 
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -161,6 +175,60 @@
     .insight-box { margin-bottom: 17px; padding: 16px; border: 1px solid var(--line); color: var(--muted); }
     .source-note { margin-top: 22px; color: var(--muted); font-size: .78rem; }
 
+    .support { margin-top: 18px; border: 1px solid var(--line); background: var(--surface); }
+    .support summary { padding: 11px 16px; cursor: pointer; color: var(--muted); font-size: .88rem; font-weight: 600; }
+    .support-body { padding: 0 16px 14px; color: var(--muted); font-size: .9rem; }
+    .support-body p { margin-bottom: 8px; }
+    .support-body a { color: var(--accent); }
+
+    .states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .state-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .state-option > span { display: block; height: 100%; padding: 14px; border: 1px solid var(--line); border-left: 4px solid var(--state); border-radius: 3px; cursor: pointer; }
+    .state-option strong { display: block; font-size: .95rem; }
+    .state-option small { display: block; margin-top: 3px; color: var(--muted); font-size: .82rem; line-height: 1.35; }
+    .state-option input:checked + span { background: var(--state-soft); border-color: var(--state); }
+    .state-option input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+    [data-state="safe"] { --state: var(--safe); --state-soft: var(--safe-soft); }
+    [data-state="mobilized"] { --state: var(--mobilized); --state-soft: var(--mobilized-soft); }
+    [data-state="shutdown"] { --state: var(--shutdown); --state-soft: var(--shutdown-soft); }
+    .range-ends { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .76rem; }
+    .suggest { margin-top: 16px; padding: 15px 16px; background: var(--state-soft, var(--surface-2)); border-left: 3px solid var(--state, var(--accent)); }
+    .suggest p { margin-bottom: 10px; font-size: .92rem; }
+    .suggest-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .hint.small { margin: -4px 0 8px; font-size: .8rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .chip { padding: 3px 9px; border-radius: 999px; font-size: .78rem; background: var(--surface-2); }
+    .chip.glimmer { background: var(--safe-soft); }
+    .chip.trigger { background: var(--mobilized-soft); }
+    .state-badge { display: inline-block; margin: 8px 0 4px; padding: 3px 9px; border-radius: 999px; background: var(--state-soft); color: var(--ink); font-size: .78rem; font-weight: 600; box-shadow: inset 3px 0 0 var(--state); }
+
+    .regulate-intro { max-width: 680px; margin-bottom: 20px; }
+    .regulate-intro h2 { margin-bottom: 8px; font: 400 2.2rem/1.05 "Libre Caslon Display", Georgia, serif; }
+    .regulate-intro p { color: var(--muted); }
+    .regulate-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+    .practice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .practice { display: flex; flex-direction: column; gap: 8px; padding: 18px; background: var(--surface); border: 1px solid var(--line); text-align: left; cursor: pointer; }
+    .practice:hover { border-color: var(--accent); }
+    .practice h3 { margin: 0; font: 400 1.3rem/1.15 "Libre Caslon Display", Georgia, serif; }
+    .practice p { margin: 0; color: var(--muted); font-size: .86rem; }
+    .practice-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 4px; }
+    .practice-meta .chip[data-state] { background: var(--state-soft); }
+    .session { padding: 0; scroll-margin-top: 64px; }
+    .session .sheet-head { align-items: center; }
+    .session .sheet-head .button { flex: none; }
+    .session-body { padding: 25px 28px 28px; }
+    .session-body h3 { margin-bottom: 7px; font: 400 1.48rem/1.15 "Libre Caslon Display", Georgia, serif; }
+    .pacer-wrap { display: grid; place-items: center; height: 250px; }
+    .pacer { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, var(--accent-soft) 0, color-mix(in srgb, var(--accent) 35%, transparent) 100%); box-shadow: 0 0 0 1px var(--line); transform: scale(.55); transition: transform 4s ease-in-out; }
+    .phase { text-align: center; font: 400 1.9rem/1.2 "Libre Caslon Display", Georgia, serif; }
+    .step-text { min-height: 120px; display: grid; place-items: center; padding: 20px 0; text-align: center; font: 400 1.4rem/1.35 "Libre Caslon Display", Georgia, serif; }
+    .countdown { text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; margin: 8px 0 18px; }
+    .session-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .shift { font: 400 2.4rem/1 "Libre Caslon Display", Georgia, serif; color: var(--accent); }
+    .works-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+    .works-row:last-child { border-bottom: 0; }
+    .works-row span:last-child { color: var(--muted); white-space: nowrap; }
+
     @media (max-width: 820px) {
       .shell { width: min(100% - 22px, 680px); padding-top: 8px; }
       .masthead { grid-template-columns: 1fr; gap: 22px; padding-top: 32px; }
@@ -170,16 +238,19 @@
       .journal-layout { grid-template-columns: 1fr; }
       .companion { position: static; order: -1; }
       .rating-grid { grid-template-columns: 1fr 1fr; }
+      .regulate-layout { grid-template-columns: 1fr; }
+      .regulate-layout .companion { order: 0; }
     }
     @media (max-width: 540px) {
       h1 { font-size: 3.25rem; }
       .sheet-head, .form-section, .actions { padding-left: 18px; padding-right: 18px; }
-      .two-col, .rating-grid { grid-template-columns: 1fr; }
+      .two-col, .rating-grid, .states, .practice-grid { grid-template-columns: 1fr; }
+      .session-body { padding: 20px 18px 22px; }
       .entry { grid-template-columns: 1fr; }
       .entry-meta { border-right: 0; border-bottom: 1px solid var(--line); }
       .section-tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); }
     }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .pacer { transition: none !important; } }
   </style>
 </head>
 <body>
@@ -195,6 +266,17 @@
         <div class="session-note" id="storageNote">Entries are saved privately on this device</div>
       </div>
     </header>
+
+    <details class="support">
+      <summary>Need support right now?</summary>
+      <div class="support-body">
+        <p>If you're in crisis or thinking about harming yourself, please reach out to a person now.</p>
+        <p><strong>US:</strong> call or text <a href="tel:988">988</a> (Suicide &amp; Crisis Lifeline), or text HOME to <a href="sms:741741">741741</a>.<br>
+        <strong>Elsewhere:</strong> find a free local line at <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>.<br>
+        <strong>Emergency:</strong> call your local emergency number.</p>
+        <p>This journal is a tool for self-awareness. It isn't a substitute for care from a therapist or doctor.</p>
+      </div>
+    </details>
 
     <section class="sky-strip" aria-label="Sky context">
       <article class="sky-card">
@@ -216,6 +298,7 @@
 
     <nav class="section-tabs" aria-label="Journal sections">
       <button class="tab" type="button" data-tab="today" aria-selected="true">Today</button>
+      <button class="tab" type="button" data-tab="regulate" aria-selected="false">Regulate</button>
       <button class="tab" type="button" data-tab="lookback" aria-selected="false">Look back <span id="entryCount">0</span></button>
     </nav>
 
@@ -226,6 +309,37 @@
             <h2>Daily check-in</h2>
             <span class="step-count">Move slowly. Be honest.</span>
           </div>
+
+          <section class="form-section">
+            <h3>Where is your nervous system?</h3>
+            <p class="hint">No state is wrong. Each one is your body doing its best to keep you safe.</p>
+            <div class="states" role="radiogroup" aria-label="Nervous system state">
+              <label class="state-option" data-state="safe"><input type="radio" name="nsState" value="safe"><span><strong>Safe &amp; connected</strong><small>Calm, present, open to others</small></span></label>
+              <label class="state-option" data-state="mobilized"><input type="radio" name="nsState" value="mobilized"><span><strong>Mobilized</strong><small>Anxious, wired, irritable, racing</small></span></label>
+              <label class="state-option" data-state="shutdown"><input type="radio" name="nsState" value="shutdown"><span><strong>Shut down</strong><small>Numb, foggy, heavy, far away</small></span></label>
+            </div>
+            <div class="suggest" id="stateSuggest" hidden>
+              <p id="suggestText"></p>
+              <div class="suggest-actions" id="suggestActions"></div>
+            </div>
+            <div class="range-wrap" style="margin-top:20px">
+              <div class="range-top"><label for="windowTol">Window of tolerance</label><output id="windowTolOut">5</output></div>
+              <input id="windowTol" type="range" min="1" max="10" value="5">
+              <div class="range-ends"><span>Narrow: little feels manageable</span><span>Wide: I can hold a lot</span></div>
+            </div>
+            <div class="two-col" style="margin-top:20px">
+              <div>
+                <label class="field-label" for="glimmers">Glimmers</label>
+                <p class="hint small">Small moments that brought you toward safety: sunlight, a kind text, a warm drink.</p>
+                <input id="glimmers" type="text" placeholder="Separate with commas">
+              </div>
+              <div>
+                <label class="field-label" for="triggers">Triggers</label>
+                <p class="hint small">Moments that pulled you toward alarm or shutdown.</p>
+                <input id="triggers" type="text" placeholder="Separate with commas">
+              </div>
+            </div>
+          </section>
 
           <section class="form-section">
             <h3>Arrive</h3>
@@ -326,6 +440,84 @@
       </div>
     </section>
 
+    <section class="panel" id="regulatePanel" hidden>
+      <div class="regulate-intro">
+        <h2>Regulate</h2>
+        <p>Short practices to help your body find its way back toward safety. Rate how settled you feel before and after, and over time you'll see which practices actually work for you.</p>
+      </div>
+      <div class="regulate-layout">
+        <div>
+          <div class="practice-grid" id="practiceGrid"></div>
+          <section class="sheet session" id="session" hidden>
+            <div class="sheet-head">
+              <h2 id="sessionTitle"></h2>
+              <button class="button" type="button" id="sessionClose">← Practices</button>
+            </div>
+
+            <div class="session-body" id="stageBefore">
+              <p class="hint" id="sessionWhy"></p>
+              <h3>Before you begin</h3>
+              <p class="hint">Where are you right now?</p>
+              <div class="states" role="radiogroup" aria-label="State before practice">
+                <label class="state-option" data-state="safe"><input type="radio" name="beforeState" value="safe"><span><strong>Safe &amp; connected</strong></span></label>
+                <label class="state-option" data-state="mobilized"><input type="radio" name="beforeState" value="mobilized"><span><strong>Mobilized</strong></span></label>
+                <label class="state-option" data-state="shutdown"><input type="radio" name="beforeState" value="shutdown"><span><strong>Shut down</strong></span></label>
+              </div>
+              <div class="range-wrap" style="margin:20px 0">
+                <div class="range-top"><label for="settledBefore">How settled do you feel?</label><output id="settledBeforeOut">5</output></div>
+                <input id="settledBefore" type="range" min="1" max="10" value="5">
+                <div class="range-ends"><span>Not at all</span><span>Completely</span></div>
+              </div>
+              <button class="button primary" type="button" id="sessionBegin">Begin</button>
+            </div>
+
+            <div class="session-body" id="stageRun" hidden>
+              <div class="pacer-wrap" id="pacerWrap"><div class="pacer" id="pacer"></div></div>
+              <p class="phase" id="phase" aria-live="polite"></p>
+              <p class="step-text" id="stepText" aria-live="polite"></p>
+              <p class="countdown" id="countdown"></p>
+              <div class="session-actions">
+                <button class="button" type="button" id="stepNext">Next step</button>
+                <button class="button" type="button" id="sessionFinish">I'm done</button>
+              </div>
+            </div>
+
+            <div class="session-body" id="stageAfter" hidden>
+              <h3>Check back in</h3>
+              <p class="hint">No right answer. Sometimes a practice helps, sometimes it doesn't, and both are useful to know.</p>
+              <div class="range-wrap" style="margin:20px 0">
+                <div class="range-top"><label for="settledAfter">How settled do you feel now?</label><output id="settledAfterOut">5</output></div>
+                <input id="settledAfter" type="range" min="1" max="10" value="5">
+                <div class="range-ends"><span>Not at all</span><span>Completely</span></div>
+              </div>
+              <label class="field-label" for="sessionNote">Anything you noticed? (optional)</label>
+              <textarea id="sessionNote" class="answer" placeholder="Shoulders dropped, breath got easier, still buzzing..."></textarea>
+              <div class="actions" style="padding:18px 0 0">
+                <button class="button primary" type="button" id="sessionSave">Save</button>
+              </div>
+            </div>
+
+            <div class="session-body" id="stageDone" hidden>
+              <h3>Logged</h3>
+              <p class="shift" id="shiftText"></p>
+              <p class="hint" id="shiftNote"></p>
+              <button class="button" type="button" id="sessionAgain">Back to practices</button>
+            </div>
+          </section>
+        </div>
+        <aside class="companion">
+          <section class="companion-card">
+            <h2>What works for you</h2>
+            <div id="worksList"></div>
+          </section>
+          <section class="companion-card">
+            <span class="label">A gentle reminder</span>
+            <p>Regulation isn't about always feeling calm. It's about being able to come back. Every time you notice your state, you're building that path.</p>
+          </section>
+        </aside>
+      </div>
+    </section>
+
     <section class="panel" id="lookbackPanel" hidden>
       <div class="insight-box" id="insightBox">Add at least two entries to begin seeing simple patterns.</div>
       <div class="timeline" id="timeline">
@@ -340,7 +532,44 @@
     (function () {
       "use strict";
       var STORAGE_KEY = "mood-log-entries-v1";
+      var REG_KEY = "mood-log-regulation-v1";
       var entries = [];
+      var sessions = [];
+      var STATES = {
+        safe: { name: "Safe & connected" },
+        mobilized: { name: "Mobilized" },
+        shutdown: { name: "Shut down" }
+      };
+
+      // Regulation practices. Breath practices use `pattern` ([label, seconds, pacer size]);
+      // guided practices use `steps`, spread evenly across `time` seconds.
+      var practices = [
+        { id: "sigh", name: "Physiological sigh", for: ["mobilized"], time: 60,
+          why: "Two inhales re-open the lungs, then a long exhale slows the heart. One of the quickest ways to bring stress down.",
+          pattern: [["Inhale", 2, .9], ["Sip in a little more", 1, 1], ["Long, slow exhale", 6, .5]] },
+        { id: "exhale", name: "Longer exhale", for: ["mobilized", "safe"], time: 120,
+          why: "Breathing out for longer than you breathe in engages the body's calming (parasympathetic) response.",
+          pattern: [["Inhale", 4, 1], ["Exhale slowly", 6, .5]] },
+        { id: "box", name: "Box breathing", for: ["mobilized"], time: 120,
+          why: "Steady, even counts give a racing mind something simple to follow.",
+          pattern: [["Inhale", 4, 1], ["Hold", 4, 1], ["Exhale", 4, .5], ["Hold", 4, .5]] },
+        { id: "voo", name: "Voo breath", for: ["shutdown", "mobilized"], time: 90,
+          why: "From Peter Levine's Somatic Experiencing. A low \"voooo\" on the exhale vibrates the chest and belly and helps you come back into your body.",
+          pattern: [["Breathe in", 4, 1], ["Exhale with a low \"voooo\"", 8, .5]] },
+        { id: "orient", name: "Orienting (5-4-3-2-1)", for: ["mobilized", "shutdown"], time: 100,
+          why: "Slowly taking in your surroundings tells the oldest parts of your brain that you're safe right here, right now.",
+          steps: ["Let your eyes wander slowly around the room. Name 5 things you can see.", "Name 4 things you can hear, near and far.", "Notice 3 things you can feel: your feet, your clothes, the air on your skin.", "Notice 2 things you can smell.", "Notice 1 thing you can taste. Then take one easy breath."] },
+        { id: "cold", name: "Cool water reset", for: ["mobilized"], time: 60,
+          why: "Cool water on the face triggers the dive reflex, which naturally slows your heart rate. Skip this one if you have a heart condition.",
+          steps: ["Run cool water, or grab something cold like an ice pack or a cold can.", "Splash your face, or hold the cold to your cheeks and under your eyes.", "Breathe slowly and notice your heartbeat begin to settle."] },
+        { id: "butterfly", name: "Butterfly hug", for: ["mobilized", "shutdown"], time: 120,
+          why: "Slow, alternating taps are soothing and help you feel held. The technique comes from EMDR therapy.",
+          steps: ["Cross your arms over your chest, hands resting just below your collarbones.", "Slowly tap: left, right, left, right, like a calm heartbeat.", "Keep tapping. Breathe naturally. Let thoughts drift past like clouds.", "Let the taps slow down. Finish with a long exhale."] },
+        { id: "move", name: "Gentle wake-up", for: ["shutdown"], time: 120,
+          why: "When you're shut down, small movements gently bring energy back without overwhelming you.",
+          steps: ["Wiggle your fingers and toes. Notice they're yours.", "Shake out your hands, then your arms, loosely.", "Roll your shoulders and sway gently side to side.", "Press your feet into the floor. Notice what feels different."] }
+      ];
+      function practiceById(id) { return practices.filter(function (p) { return p.id === id; })[0]; }
       var now = new Date();
       var zodiacs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
       var themes = {
@@ -388,16 +617,25 @@
 
       // ---- On-device storage ----
       var storageOk = true;
-      function loadEntries() {
+      function loadList(key, normalize) {
         try {
-          var raw = localStorage.getItem(STORAGE_KEY);
+          var raw = localStorage.getItem(key);
           if (!raw) return [];
           var parsed = JSON.parse(raw);
-          return Array.isArray(parsed) ? parsed.map(normalizeImportedEntry) : [];
+          if (!Array.isArray(parsed)) return [];
+          // Skip any single damaged item rather than losing the whole journal
+          return parsed.reduce(function (out, item) {
+            try { out.push(normalize(item)); } catch (e) {}
+            return out;
+          }, []);
         } catch (err) { storageOk = false; return []; }
       }
       function saveEntries() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); return true; }
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+          localStorage.setItem(REG_KEY, JSON.stringify(sessions));
+          return true;
+        }
         catch (err) {
           storageOk = false;
           $("storageNote").textContent = "Couldn’t save on this device — export to keep entries";
@@ -452,9 +690,17 @@
       }
 
       function bindRanges() {
-        ["mood", "energy", "clarity", "connection"].forEach(function (id) {
+        ["mood", "energy", "clarity", "connection", "windowTol", "settledBefore", "settledAfter"].forEach(function (id) {
           $(id).addEventListener("input", function () { $(id + "Out").textContent = this.value; });
         });
+      }
+
+      function checkedValue(name) {
+        var el = document.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : "";
+      }
+      function splitList(text) {
+        return text.split(/[,\n]/).map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 30);
       }
 
       function selectedFeelings() {
@@ -468,6 +714,7 @@
         return {
           id: Date.now(), date: isoDate(at), displayDate: at.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }),
           sky: { phase: md.phase, moonSign: md.sign, sunSign: zodiacs[Math.floor(sunLongitude(at) / 30)] },
+          nervous: { state: checkedValue("nsState"), window: +$("windowTol").value, glimmers: splitList($("glimmers").value), triggers: splitList($("triggers").value) },
           ratings: { mood: +$("mood").value, energy: +$("energy").value, clarity: +$("clarity").value, connection: +$("connection").value },
           feelings: selectedFeelings(),
           mind: { question: $("mindQuestion").textContent, answer: $("mindAnswer").value.trim(), thoughts: $("thoughts").value.trim() },
@@ -504,6 +751,7 @@
           date: safeText(raw.date, 20), displayDate: safeText(raw.displayDate, 80),
           sky: { phase: safeText(raw.sky.phase, 40), moonSign: safeText(raw.sky.moonSign, 40), sunSign: safeText(raw.sky.sunSign, 40) },
           ratings: { mood: boundedRating(raw.ratings.mood), energy: boundedRating(raw.ratings.energy), clarity: boundedRating(raw.ratings.clarity), connection: boundedRating(raw.ratings.connection) },
+          nervous: normalizeNervous(raw.nervous),
           feelings: Array.isArray(raw.feelings) ? raw.feelings.slice(0, 30).map(function (v) { return safeText(v, 60); }) : [],
           mind: { question: safeText(raw.mind.question), answer: safeText(raw.mind.answer), thoughts: safeText(raw.mind.thoughts) },
           body: { question: safeText(raw.body && raw.body.question), answer: safeText(raw.body && raw.body.answer), sleep: safeText(raw.body && raw.body.sleep, 80), sleepHours: safeText(raw.body && raw.body.sleepHours, 40) },
@@ -511,6 +759,34 @@
           spirit: { question: safeText(raw.spirit && raw.spirit.question), answer: safeText(raw.spirit && raw.spirit.answer) },
           freewrite: safeText(raw.freewrite)
         };
+      }
+
+      function normalizeNervous(raw) {
+        if (!raw || typeof raw !== "object") return { state: "", window: null, glimmers: [], triggers: [] };
+        var list = function (v) { return Array.isArray(v) ? v.slice(0, 30).map(function (t) { return safeText(t, 120); }) : []; };
+        var w = Number(raw.window);
+        return {
+          state: STATES[raw.state] ? raw.state : "",
+          window: Number.isFinite(w) && w >= 1 && w <= 10 ? w : null,
+          glimmers: list(raw.glimmers), triggers: list(raw.triggers)
+        };
+      }
+
+      function normalizeSession(raw) {
+        if (!raw || typeof raw !== "object" || !practiceById(raw.practice)) throw new Error("Invalid session");
+        return {
+          id: Number.isFinite(Number(raw.id)) ? Number(raw.id) : Date.now(),
+          practice: raw.practice, date: safeText(raw.date, 20),
+          beforeState: STATES[raw.beforeState] ? raw.beforeState : "",
+          before: boundedRating(raw.before), after: boundedRating(raw.after),
+          note: safeText(raw.note, 2000)
+        };
+      }
+
+      function chipRow(items, kind) {
+        var row = textNode("div", "chips", "");
+        items.forEach(function (t) { row.appendChild(textNode("span", "chip " + kind, t)); });
+        return row;
       }
 
       function renderEntries() {
@@ -532,18 +808,37 @@
           meta.appendChild(textNode("span", "", e.sky.phase));
           meta.appendChild(document.createElement("br"));
           meta.appendChild(textNode("span", "", "Moon in " + e.sky.moonSign));
+          if (e.nervous.state) {
+            meta.appendChild(document.createElement("br"));
+            var badge = textNode("span", "state-badge", STATES[e.nervous.state].name);
+            badge.dataset.state = e.nervous.state;
+            meta.appendChild(badge);
+          }
           var body = textNode("div", "entry-body", "");
           var stats = textNode("div", "entry-stats", "");
           [["Mood", e.ratings.mood], ["Energy", e.ratings.energy], ["Clarity", e.ratings.clarity], ["Connection", e.ratings.connection]].forEach(function (pair) {
             stats.appendChild(textNode("span", "stat", pair[0] + " " + pair[1] + "/10"));
           });
+          if (e.nervous.window) stats.appendChild(textNode("span", "stat", "Window " + e.nervous.window + "/10"));
           body.appendChild(stats);
+          if (e.nervous.glimmers.length) { body.appendChild(textNode("p", "hint small", "Glimmers")); body.appendChild(chipRow(e.nervous.glimmers, "glimmer")); }
+          if (e.nervous.triggers.length) { body.appendChild(textNode("p", "hint small", "Triggers")); body.appendChild(chipRow(e.nervous.triggers, "trigger")); }
           body.appendChild(textNode("p", "", e.freewrite || e.mind.thoughts || e.mind.answer || "A quiet page—signals recorded without extra words."));
           if (e.feelings.length) body.appendChild(textNode("p", "", "Feelings: " + e.feelings.join(", ")));
           if (e.movement.didMove) body.appendChild(textNode("p", "", "Movement: " + (e.movement.workout || "Yes") + (e.movement.duration ? " · " + e.movement.duration : "")));
           article.appendChild(meta); article.appendChild(body); timeline.appendChild(article);
         });
         renderInsight();
+      }
+
+      function mostCommon(list) {
+        var tally = {}, best = "", bestN = 1;
+        list.forEach(function (t) {
+          var k = t.toLowerCase();
+          tally[k] = (tally[k] || 0) + 1;
+          if (tally[k] > bestN) { bestN = tally[k]; best = t; }
+        });
+        return best;
       }
 
       function average(key) { return entries.reduce(function (sum, e) { return sum + Number(e.ratings[key] || 0); }, 0) / entries.length; }
@@ -555,12 +850,21 @@
           var movementMood = moved.reduce(function (s, e) { return s + e.ratings.mood; }, 0) / moved.length;
           text += "On days with movement, your recorded mood averages " + movementMood.toFixed(1) + ". This is a correlation to notice, not a conclusion.";
         } else { text += "Keep recording sleep and movement to give the pattern lens more context."; }
+        var counts = {};
+        entries.forEach(function (e) { if (e.nervous.state) counts[e.nervous.state] = (counts[e.nervous.state] || 0) + 1; });
+        var logged = Object.keys(counts);
+        if (logged.length) {
+          text += " Nervous system: " + logged.sort(function (a, b) { return counts[b] - counts[a]; }).map(function (k) { return STATES[k].name.toLowerCase() + " " + counts[k] + "×"; }).join(", ") + ".";
+        }
+        var topGlimmer = mostCommon(entries.reduce(function (all, e) { return all.concat(e.nervous.glimmers); }, []));
+        if (topGlimmer) text += " Your most frequent glimmer: \u201c" + topGlimmer + "\u201d.";
         $("insightBox").textContent = text;
       }
 
       function clearForm() {
         $("journalForm").reset();
-        ["mood", "energy", "clarity", "connection"].forEach(function (id) { $(id).value = 5; $(id + "Out").textContent = "5"; });
+        ["mood", "energy", "clarity", "connection", "windowTol"].forEach(function (id) { $(id).value = 5; $(id + "Out").textContent = "5"; });
+        $("stateSuggest").hidden = true;
         setPrompts();
       }
 
@@ -572,12 +876,14 @@
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       }
 
-      document.querySelectorAll(".tab").forEach(function (tab) {
-        tab.addEventListener("click", function () {
-          document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", String(t === tab)); });
-          $("todayPanel").hidden = tab.dataset.tab !== "today";
-          $("lookbackPanel").hidden = tab.dataset.tab !== "lookback";
+      function showTab(name) {
+        document.querySelectorAll(".tab").forEach(function (t) {
+          t.setAttribute("aria-selected", String(t.dataset.tab === name));
+          $(t.dataset.tab + "Panel").hidden = t.dataset.tab !== name;
         });
+      }
+      document.querySelectorAll(".tab").forEach(function (tab) {
+        tab.addEventListener("click", function () { showTab(tab.dataset.tab); });
       });
 
       $("journalForm").addEventListener("submit", function (event) {
@@ -587,13 +893,13 @@
         renderEntries();
         $("dataStatus").textContent = saved ? "Entry saved on this device." : "Entry added, but couldn’t be saved here. Export to keep it.";
         clearForm();
-        document.querySelector('[data-tab="lookback"]').click();
+        showTab("lookback");
         window.scrollTo(0, 0);
       });
       $("clearForm").addEventListener("click", clearForm);
       $("newPrompts").addEventListener("click", setPrompts);
       $("exportJson").addEventListener("click", function () {
-        download("mood-log-journal-" + isoDate(new Date()) + ".json", JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), entries: entries }, null, 2), "application/json");
+        download("mood-log-journal-" + isoDate(new Date()) + ".json", JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), entries: entries, regulation: sessions }, null, 2), "application/json");
         $("dataStatus").textContent = entries.length ? "Journal exported." : "Empty journal exported.";
       });
       $("importJson").addEventListener("click", function () { $("fileInput").click(); });
@@ -605,23 +911,228 @@
             var parsed = JSON.parse(reader.result);
             if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.entries) || parsed.entries.length > 5000) throw new Error("Invalid journal format");
             var incoming = parsed.entries.map(normalizeImportedEntry);
+            var incomingSessions = Array.isArray(parsed.regulation) ? parsed.regulation.slice(0, 20000).map(normalizeSession) : [];
             // Merge with what's already on this device instead of replacing it
-            var known = {};
-            entries.forEach(function (e) { known[e.id] = true; });
-            var added = incoming.filter(function (e) { return !known[e.id]; });
+            var added = mergeById(entries, incoming);
             entries = entries.concat(added).sort(function (a, b) { return a.id - b.id; });
-            saveEntries(); renderEntries();
+            sessions = sessions.concat(mergeById(sessions, incomingSessions)).sort(function (a, b) { return a.id - b.id; });
+            saveEntries(); renderEntries(); renderWorks();
             $("dataStatus").textContent = added.length + " new entr" + (added.length === 1 ? "y" : "ies") + " imported.";
           } catch (err) { $("dataStatus").textContent = "That file is not a Mood Log journal export."; }
         };
         reader.readAsText(file); this.value = "";
       });
 
+      function mergeById(existing, incoming) {
+        var known = {};
+        existing.forEach(function (e) { known[e.id] = true; });
+        return incoming.filter(function (e) { return !known[e.id]; });
+      }
+
+      // ---- Regulation toolkit ----
+      var active = null; // { practice, start, timers, stepIndex }
+
+      function practiceStats() {
+        var stats = {};
+        sessions.forEach(function (s) {
+          var st = stats[s.practice] || (stats[s.practice] = { count: 0, shift: 0 });
+          st.count += 1; st.shift += s.after - s.before;
+        });
+        Object.keys(stats).forEach(function (k) { stats[k].avg = stats[k].shift / stats[k].count; });
+        return stats;
+      }
+
+      function formatShift(n) { return (n > 0 ? "+" : n < 0 ? "\u2212" : "\u00b1") + Math.abs(n).toFixed(1); }
+
+      // Practices for a state, best personal results first, then the default order
+      function practicesFor(state) {
+        var stats = practiceStats();
+        return practices.filter(function (p) { return p.for.indexOf(state) !== -1; }).sort(function (a, b) {
+          var sa = stats[a.id] ? stats[a.id].avg : -99, sb = stats[b.id] ? stats[b.id].avg : -99;
+          return sb - sa;
+        });
+      }
+
+      function renderPractices() {
+        var grid = $("practiceGrid");
+        grid.replaceChildren();
+        var stats = practiceStats();
+        practices.forEach(function (p) {
+          var card = textNode("button", "practice", "");
+          card.type = "button";
+          card.appendChild(textNode("h3", "", p.name));
+          card.appendChild(textNode("p", "", p.why));
+          var meta = textNode("div", "practice-meta", "");
+          meta.appendChild(textNode("span", "chip", Math.round(p.time / 60 * 2) / 2 + " min"));
+          p.for.forEach(function (s) {
+            if (s === "safe") return;
+            var chip = textNode("span", "chip", "For " + STATES[s].name.toLowerCase());
+            chip.dataset.state = s;
+            meta.appendChild(chip);
+          });
+          if (stats[p.id]) meta.appendChild(textNode("span", "chip", formatShift(stats[p.id].avg) + " for you"));
+          card.appendChild(meta);
+          card.addEventListener("click", function () { openSession(p.id); });
+          grid.appendChild(card);
+        });
+      }
+
+      function renderWorks() {
+        var box = $("worksList");
+        box.replaceChildren();
+        var stats = practiceStats();
+        var ids = Object.keys(stats).sort(function (a, b) { return stats[b].avg - stats[a].avg; });
+        if (!ids.length) {
+          box.appendChild(textNode("p", "", "Try a practice and rate yourself before and after. Your results will show up here, ranked by how much each one helps you."));
+          return;
+        }
+        ids.forEach(function (id) {
+          var row = textNode("div", "works-row", "");
+          row.appendChild(textNode("span", "", practiceById(id).name));
+          row.appendChild(textNode("span", "", formatShift(stats[id].avg) + " avg \u00b7 " + stats[id].count + "\u00d7"));
+          box.appendChild(row);
+        });
+        box.appendChild(textNode("p", "hint small", "Average change in how settled you felt, from before to after."));
+        renderPractices();
+      }
+
+      function showStage(name) {
+        ["Before", "Run", "After", "Done"].forEach(function (n) { $("stage" + n).hidden = n !== name; });
+      }
+
+      function openSession(id, state) {
+        stopTimers();
+        var p = practiceById(id);
+        active = { practice: p, timers: [], stepIndex: 0 };
+        $("sessionTitle").textContent = p.name;
+        $("sessionWhy").textContent = p.why;
+        document.querySelectorAll('input[name="beforeState"]').forEach(function (el) { el.checked = el.value === state; });
+        $("settledBefore").value = 5; $("settledBeforeOut").textContent = "5";
+        $("settledAfter").value = 5; $("settledAfterOut").textContent = "5";
+        $("sessionNote").value = "";
+        $("practiceGrid").hidden = true;
+        $("session").hidden = false;
+        showStage("Before");
+        showTab("regulate");
+        $("session").scrollIntoView({ block: "start" });
+      }
+
+      function closeSession() {
+        stopTimers();
+        active = null;
+        $("session").hidden = true;
+        $("practiceGrid").hidden = false;
+      }
+
+      function stopTimers() {
+        if (!active) return;
+        active.timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
+        active.timers = [];
+      }
+
+      function beginPractice() {
+        var p = active.practice;
+        active.start = Date.now();
+        showStage("Run");
+        $("session").scrollIntoView({ block: "start" });
+        var isBreath = !!p.pattern;
+        $("pacerWrap").hidden = !isBreath;
+        $("phase").hidden = !isBreath;
+        $("stepText").hidden = isBreath;
+        $("stepNext").hidden = isBreath;
+        if (isBreath) runBreath(0); else showStep(0);
+        tick();
+        active.timers.push(setInterval(tick, 250));
+      }
+
+      function tick() {
+        var left = Math.max(0, active.practice.time - (Date.now() - active.start) / 1000);
+        var secs = Math.ceil(left);
+        $("countdown").textContent = Math.floor(secs / 60) + ":" + pad(secs % 60) + " remaining";
+        if (active.practice.steps) {
+          var per = active.practice.time / active.practice.steps.length;
+          var idx = Math.min(active.practice.steps.length - 1, Math.floor((active.practice.time - left) / per));
+          if (idx > active.stepIndex) showStep(idx);
+        }
+        if (left <= 0) finishPractice();
+      }
+
+      function runBreath(i) {
+        var phase = active.practice.pattern[i % active.practice.pattern.length];
+        var pacer = $("pacer");
+        pacer.style.transitionDuration = phase[1] + "s";
+        pacer.style.transform = "scale(" + phase[2] + ")";
+        $("phase").textContent = phase[0];
+        active.timers.push(setTimeout(function () { runBreath(i + 1); }, phase[1] * 1000));
+      }
+
+      function showStep(i) {
+        active.stepIndex = i;
+        $("stepText").textContent = active.practice.steps[i];
+        $("stepNext").textContent = i < active.practice.steps.length - 1 ? "Next step" : "Finish";
+      }
+
+      function finishPractice() {
+        stopTimers();
+        $("pacer").style.transitionDuration = "0s";
+        $("pacer").style.transform = "scale(.55)";
+        showStage("After");
+      }
+
+      function saveSession() {
+        var at = new Date();
+        var s = {
+          id: Date.now(), practice: active.practice.id, date: isoDate(at),
+          beforeState: checkedValue("beforeState"),
+          before: +$("settledBefore").value, after: +$("settledAfter").value,
+          note: $("sessionNote").value.trim()
+        };
+        sessions.push(s);
+        saveEntries();
+        var diff = s.after - s.before;
+        $("shiftText").textContent = diff === 0 ? "No change" : formatShift(diff);
+        $("shiftNote").textContent = diff > 0 ? "You felt more settled afterward. Your body responded to this one."
+          : diff < 0 ? "You felt less settled afterward. That's useful information. Not every practice fits every body or every moment."
+          : "Same as before. Sometimes the effect shows up later, and sometimes a different practice fits better.";
+        showStage("Done");
+        renderWorks();
+      }
+
+      function updateSuggestion() {
+        var state = checkedValue("nsState");
+        var box = $("stateSuggest");
+        if (state !== "mobilized" && state !== "shutdown") { box.hidden = true; return; }
+        box.dataset.state = state;
+        $("suggestText").textContent = state === "mobilized"
+          ? "Your body is mobilized. A slower exhale or orienting to the room can help it settle. Want to try one now?"
+          : "Your body is in shutdown. Gentle sound, touch, or movement can help bring you back. Want to try one now?";
+        var actions = $("suggestActions");
+        actions.replaceChildren();
+        practicesFor(state).slice(0, 2).forEach(function (p) {
+          var b = textNode("button", "button", p.name);
+          b.type = "button";
+          b.addEventListener("click", function () { openSession(p.id, state); });
+          actions.appendChild(b);
+        });
+        box.hidden = false;
+      }
+
+      document.querySelectorAll('input[name="nsState"]').forEach(function (el) { el.addEventListener("change", updateSuggestion); });
+      $("sessionBegin").addEventListener("click", beginPractice);
+      $("sessionFinish").addEventListener("click", finishPractice);
+      $("stepNext").addEventListener("click", function () {
+        if (active.stepIndex < active.practice.steps.length - 1) showStep(active.stepIndex + 1); else finishPractice();
+      });
+      $("sessionSave").addEventListener("click", saveSession);
+      $("sessionClose").addEventListener("click", closeSession);
+      $("sessionAgain").addEventListener("click", closeSession);
+
       $("weekday").textContent = now.toLocaleDateString(undefined, { weekday: "long" });
       $("displayDate").textContent = now.toLocaleDateString(undefined, { month: "long", day: "numeric" });
-      entries = loadEntries();
+      entries = loadList(STORAGE_KEY, normalizeImportedEntry);
+      sessions = loadList(REG_KEY, normalizeSession);
       if (!storageOk) $("storageNote").textContent = "Saving is off here — export to keep entries";
-      renderSky(); setPrompts(); bindRanges(); renderEntries();
+      renderSky(); setPrompts(); bindRanges(); renderEntries(); renderPractices(); renderWorks();
 
       // Offline support + install
       if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {

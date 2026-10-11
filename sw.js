@@ -1,5 +1,5 @@
 // Bump this version whenever you change index.html so installed copies update.
-var CACHE = "mood-log-v1";
+var CACHE = "mood-log-v2";
 var APP_FILES = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", function (event) {
