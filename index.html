@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0b0d16">
+  <meta name="description" content="A guided daily journal for your mind, body, spirit, feelings, workouts, and unfiltered thoughts.">
+  <!-- App install (PWA) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mood Log">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Mood Log</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Libre+Caslon+Display&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --bg: #f2f0ea;
+      --surface: #faf9f5;
+      --surface-2: #e8e5dd;
+      --ink: #20211f;
+      --muted: #666760;
+      --line: rgba(32, 33, 31, .16);
+      --accent: #9a5547;
+      --accent-soft: #ead5cf;
+      --celestial: #273d49;
+      --focus: #b8604d;
+      --shadow: 0 22px 70px rgba(49, 42, 32, .12);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #090b13;
+        --surface: #121620;
+        --surface-2: #1a1e2b;
+        --ink: #f0eee8;
+        --muted: #a7a7b4;
+        --line: rgba(232, 234, 244, .13);
+        --accent: #e5a494;
+        --accent-soft: #3b2728;
+        --celestial: #b8ccd4;
+        --focus: #f1ae9e;
+        --shadow: 0 24px 80px rgba(0, 0, 0, .35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      /* Keep content clear of the notch / home indicator when installed */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      background:
+        radial-gradient(circle at 14% 4%, color-mix(in srgb, var(--celestial) 10%, transparent) 0, transparent 32rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      line-height: 1.5;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 80px; }
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+      align-items: end;
+      gap: 34px;
+      padding: 42px 0 34px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 760px;
+      margin-bottom: 18px;
+      font: 400 clamp(3.1rem, 8vw, 6.8rem)/.91 "Libre Caslon Display", Georgia, serif;
+      letter-spacing: -.045em;
+    }
+    .lede { max-width: 660px; margin: 0; color: var(--muted); font-size: clamp(1.04rem, 2vw, 1.25rem); }
+    .date-block { justify-self: end; text-align: right; }
+    .date-block strong { display: block; font: 400 2.15rem/1.05 "Libre Caslon Display", Georgia, serif; }
+    .date-block span { color: var(--muted); }
+    .session-note {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 15px; padding: 8px 12px;
+      border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .82rem;
+    }
+    .session-note::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+    .sky-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 22px 0; }
+    .sky-card { min-height: 144px; padding: 20px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); border-radius: 5px; }
+    .label { display: block; margin-bottom: 14px; color: var(--muted); font-size: .74rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+    .sky-value { display: flex; align-items: center; gap: 14px; font: 400 2rem/1 "Libre Caslon Display", Georgia, serif; }
+    .moon-orb { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--ink); box-shadow: inset -15px 0 0 var(--surface-2), 0 0 0 1px var(--line); }
+    .sky-card p { margin: 14px 0 0; color: var(--muted); font-size: .9rem; }
+
+    .section-tabs { display: flex; gap: 6px; margin: 22px 0; border-bottom: 1px solid var(--line); }
+    .tab {
+      border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 13px 14px; cursor: pointer; color: var(--muted); font-weight: 600;
+    }
+    .tab[aria-selected="true"] { color: var(--ink); border-color: var(--accent); }
+    .panel[hidden] { display: none; }
+
+    .journal-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+    .sheet { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .sheet-head { display: flex; justify-content: space-between; gap: 20px; padding: 27px 28px 24px; border-bottom: 1px solid var(--line); }
+    .sheet-head h2 { margin: 0; font: 400 2.2rem/1.05 "Libre Caslon Display", Georgia, serif; }
+    .step-count { color: var(--muted); font-size: .86rem; white-space: nowrap; }
+    .form-section { padding: 25px 28px; border-bottom: 1px solid var(--line); }
+    .form-section h3 { margin-bottom: 7px; font: 400 1.48rem/1.15 "Libre Caslon Display", Georgia, serif; }
+    .hint { margin-bottom: 18px; color: var(--muted); font-size: .9rem; }
+    .question-card { margin: 16px 0; padding: 17px 18px; background: var(--surface-2); border-radius: 3px; }
+    .question-card p { margin: 0 0 12px; font-family: "Libre Caslon Display", Georgia, serif; font-size: 1.15rem; }
+    label.field-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: .88rem; }
+    textarea, input[type="text"], input[type="date"], select {
+      width: 100%; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); padding: 12px 13px;
+    }
+    textarea { min-height: 105px; resize: vertical; }
+    .answer { min-height: 82px; }
+    .rating-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px 18px; }
+    .range-wrap { min-width: 0; }
+    .range-top { display: flex; justify-content: space-between; gap: 8px; font-size: .84rem; font-weight: 600; }
+    .range-top output { color: var(--accent); }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    .feelings { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feeling input { position: absolute; opacity: 0; pointer-events: none; }
+    .feeling span { display: block; padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); cursor: pointer; font-size: .86rem; }
+    .feeling input:checked + span { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .toggle-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .toggle-row input { width: 20px; height: 20px; accent-color: var(--accent); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 24px 28px 28px; }
+    .button { border: 1px solid var(--line); border-radius: 3px; background: transparent; padding: 11px 15px; cursor: pointer; font-weight: 600; }
+    .button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .button:hover { border-color: var(--accent); }
+
+    .companion { position: sticky; top: 18px; display: grid; gap: 14px; }
+    .companion-card { padding: 22px; background: var(--surface); border: 1px solid var(--line); }
+    .companion-card h2 { margin-bottom: 10px; font: 400 1.55rem/1.15 "Libre Caslon Display", Georgia, serif; }
+    .companion-card p, .companion-card li { color: var(--muted); font-size: .91rem; }
+    .companion-card ul { margin: 0; padding-left: 19px; }
+    .prompt { padding-left: 13px; border-left: 2px solid var(--accent); color: var(--ink) !important; font-family: "Libre Caslon Display", Georgia, serif; font-size: 1.08rem !important; }
+    .mini-actions { display: grid; gap: 8px; }
+    .mini-actions .button { width: 100%; text-align: left; }
+    .status { min-height: 22px; margin: 9px 0 0; color: var(--accent); font-size: .82rem; }
+
+    .timeline { display: grid; gap: 13px; }
+    .empty { padding: 50px 28px; border: 1px solid var(--line); background: var(--surface); text-align: center; }
+    .empty h2 { font: 400 2rem/1.1 "Libre Caslon Display", Georgia, serif; }
+    .entry { display: grid; grid-template-columns: 150px 1fr; background: var(--surface); border: 1px solid var(--line); }
+    .entry-meta { padding: 21px; border-right: 1px solid var(--line); }
+    .entry-meta strong { display: block; font-family: "Libre Caslon Display", Georgia, serif; font-size: 1.3rem; }
+    .entry-body { padding: 21px; }
+    .entry-body p { margin-bottom: 12px; }
+    .entry-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 13px; }
+    .stat { padding: 5px 8px; background: var(--surface-2); border-radius: 2px; font-size: .78rem; }
+    .insight-box { margin-bottom: 17px; padding: 16px; border: 1px solid var(--line); color: var(--muted); }
+    .source-note { margin-top: 22px; color: var(--muted); font-size: .78rem; }
+
+    @media (max-width: 820px) {
+      .shell { width: min(100% - 22px, 680px); padding-top: 8px; }
+      .masthead { grid-template-columns: 1fr; gap: 22px; padding-top: 32px; }
+      .date-block { justify-self: start; text-align: left; }
+      .sky-strip { grid-template-columns: 1fr; }
+      .sky-card { min-height: 0; }
+      .journal-layout { grid-template-columns: 1fr; }
+      .companion { position: static; order: -1; }
+      .rating-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 540px) {
+      h1 { font-size: 3.25rem; }
+      .sheet-head, .form-section, .actions { padding-left: 18px; padding-right: 18px; }
+      .two-col, .rating-grid { grid-template-columns: 1fr; }
+      .entry { grid-template-columns: 1fr; }
+      .entry-meta { border-right: 0; border-bottom: 1px solid var(--line); }
+      .section-tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <h1>Notice what moves through you.</h1>
+        <p class="lede">A guided daily journal for your mind, body, spirit, feelings, workouts, and unfiltered thoughts.</p>
+      </div>
+      <div class="date-block">
+        <span id="weekday"></span>
+        <strong id="displayDate"></strong>
+        <div class="session-note" id="storageNote">Entries are saved privately on this device</div>
+      </div>
+    </header>
+
+    <section class="sky-strip" aria-label="Sky context">
+      <article class="sky-card">
+        <span class="label">Moon phase</span>
+        <div class="sky-value"><span class="moon-orb" id="moonOrb" aria-hidden="true"></span><span id="moonPhase">—</span></div>
+        <p id="moonDetail">Calculated from your device date and local time</p>
+      </article>
+      <article class="sky-card">
+        <span class="label">Moon in</span>
+        <div class="sky-value" id="moonSign">—</div>
+        <p id="moonTheme">Approximate tropical zodiac position</p>
+      </article>
+      <article class="sky-card">
+        <span class="label">Sun season</span>
+        <div class="sky-value" id="sunSign">—</div>
+        <p id="sunTheme">A seasonal lens, not a prescription</p>
+      </article>
+    </section>
+
+    <nav class="section-tabs" aria-label="Journal sections">
+      <button class="tab" type="button" data-tab="today" aria-selected="true">Today</button>
+      <button class="tab" type="button" data-tab="lookback" aria-selected="false">Look back <span id="entryCount">0</span></button>
+    </nav>
+
+    <section class="panel" id="todayPanel">
+      <div class="journal-layout">
+        <form class="sheet" id="journalForm">
+          <div class="sheet-head">
+            <h2>Daily check-in</h2>
+            <span class="step-count">Move slowly. Be honest.</span>
+          </div>
+
+          <section class="form-section">
+            <h3>Arrive</h3>
+            <p class="hint">A quick signal check before the story begins.</p>
+            <div class="rating-grid">
+              <div class="range-wrap"><div class="range-top"><label for="mood">Mood</label><output id="moodOut">5</output></div><input id="mood" name="mood" type="range" min="1" max="10" value="5"></div>
+              <div class="range-wrap"><div class="range-top"><label for="energy">Energy</label><output id="energyOut">5</output></div><input id="energy" name="energy" type="range" min="1" max="10" value="5"></div>
+              <div class="range-wrap"><div class="range-top"><label for="clarity">Mental clarity</label><output id="clarityOut">5</output></div><input id="clarity" name="clarity" type="range" min="1" max="10" value="5"></div>
+              <div class="range-wrap"><div class="range-top"><label for="connection">Spiritual connection</label><output id="connectionOut">5</output></div><input id="connection" name="connection" type="range" min="1" max="10" value="5"></div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h3>What is present?</h3>
+            <p class="hint">Choose every feeling that fits. Contradictions belong here too.</p>
+            <div class="feelings" id="feelings">
+              <label class="feeling"><input type="checkbox" name="feeling" value="Calm"><span>Calm</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Hopeful"><span>Hopeful</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Joyful"><span>Joyful</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Tender"><span>Tender</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Restless"><span>Restless</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Overwhelmed"><span>Overwhelmed</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Irritable"><span>Irritable</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Heavy"><span>Heavy</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Disconnected"><span>Disconnected</span></label>
+              <label class="feeling"><input type="checkbox" name="feeling" value="Focused"><span>Focused</span></label>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h3>Mind</h3>
+            <div class="question-card"><p id="mindQuestion"></p><textarea class="answer" id="mindAnswer" placeholder="Follow the thought without editing it..."></textarea></div>
+            <label class="field-label" for="thoughts">Thought stream</label>
+            <textarea id="thoughts" placeholder="What has been circling, repeating, or asking for your attention?"></textarea>
+          </section>
+
+          <section class="form-section">
+            <h3>Body</h3>
+            <div class="question-card"><p id="bodyQuestion"></p><textarea class="answer" id="bodyAnswer" placeholder="Name sensations, tension, appetite, pain, ease, or anything else..."></textarea></div>
+            <div class="two-col">
+              <div><label class="field-label" for="sleep">Sleep last night</label><select id="sleep"><option value="">Choose</option><option>Restorative</option><option>Okay</option><option>Restless</option><option>Very little</option></select></div>
+              <div><label class="field-label" for="sleepHours">Hours slept</label><input id="sleepHours" inputmode="decimal" type="text" placeholder="e.g. 7.5"></div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h3>Movement</h3>
+            <label class="toggle-row"><input id="workedOut" type="checkbox"><span>I moved or worked out today</span></label>
+            <div class="two-col">
+              <div><label class="field-label" for="workout">What did you do?</label><input id="workout" type="text" placeholder="Walk, strength, yoga..."></div>
+              <div><label class="field-label" for="duration">Duration</label><input id="duration" type="text" placeholder="e.g. 35 minutes"></div>
+            </div>
+            <div style="margin-top:15px"><label class="field-label" for="movementEffect">How did movement affect you?</label><textarea id="movementEffect" class="answer" placeholder="Before, during, and after..."></textarea></div>
+          </section>
+
+          <section class="form-section">
+            <h3>Spirit</h3>
+            <div class="question-card"><p id="spiritQuestion"></p><textarea class="answer" id="spiritAnswer" placeholder="There is no correct spiritual answer..."></textarea></div>
+          </section>
+
+          <section class="form-section">
+            <h3>Close the page</h3>
+            <label class="field-label" for="freewrite">What else is true right now?</label>
+            <textarea id="freewrite" style="min-height:180px" placeholder="Write freely. This space can hold the unfinished version."></textarea>
+          </section>
+
+          <div class="actions">
+            <button class="button primary" type="submit">Save entry</button>
+            <button class="button" type="button" id="clearForm">Clear form</button>
+          </div>
+        </form>
+
+        <aside class="companion">
+          <section class="companion-card">
+            <span class="label">A question to carry</span>
+            <p class="prompt" id="carryPrompt"></p>
+            <button class="button" type="button" id="newPrompts">Ask me something else</button>
+          </section>
+          <section class="companion-card">
+            <h2>Your journal, in your hands</h2>
+            <p id="storageCopy">Entries are saved privately on this device and never leave it. Export a backup now and then, or to move your journal to another device.</p>
+            <div class="mini-actions">
+              <button class="button" type="button" id="exportJson">Export journal (.json)</button>
+              <button class="button" type="button" id="importJson">Import journal</button>
+              <input id="fileInput" type="file" accept="application/json,.json" hidden>
+            </div>
+            <p class="status" id="dataStatus" role="status"></p>
+          </section>
+          <section class="companion-card">
+            <h2>Pattern lens</h2>
+            <ul>
+              <li>Notice repeated words, not isolated bad days.</li>
+              <li>Compare sleep and movement with mood.</li>
+              <li>Treat sky context as reflection, never diagnosis.</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="panel" id="lookbackPanel" hidden>
+      <div class="insight-box" id="insightBox">Add at least two entries to begin seeing simple patterns.</div>
+      <div class="timeline" id="timeline">
+        <div class="empty"><h2>Your pages will gather here.</h2><p>Add today’s entry, or import a journal file you exported earlier.</p></div>
+      </div>
+    </section>
+
+    <p class="source-note">Celestial positions are approximate calculations for reflective journaling, not an ephemeris, prediction, or medical guidance.</p>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      var STORAGE_KEY = "mood-log-entries-v1";
+      var entries = [];
+      var now = new Date();
+      var zodiacs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+      var themes = {
+        Aries: "Initiative, heat, directness", Taurus: "Grounding, appetite, steadiness", Gemini: "Curiosity, language, movement", Cancer: "Home, care, emotional tides",
+        Leo: "Expression, courage, warmth", Virgo: "Discernment, ritual, repair", Libra: "Balance, relationship, perspective", Scorpio: "Depth, privacy, transformation",
+        Sagittarius: "Meaning, freedom, exploration", Capricorn: "Structure, effort, responsibility", Aquarius: "Perspective, community, originality", Pisces: "Dreams, sensitivity, surrender"
+      };
+      var questionSets = {
+        mind: [
+          "What thought has taken up the most space today, and what might it be trying to protect?",
+          "Where did your attention feel fluid today, and where did it snag?",
+          "What changed in your mind after food, rest, movement, or connection?",
+          "If your inner narrator softened its certainty, what else might be true?",
+          "Which moments felt overstimulating, understimulating, or just right?"
+        ],
+        body: [
+          "If your body could answer before your mind, what would it ask for?",
+          "Where do you feel open, braced, warm, heavy, numb, or alive?",
+          "What physical signal arrived first today? What happened just before it?",
+          "How did your breathing, appetite, digestion, or pain shift through the day?",
+          "Did your body want exertion, recovery, comfort, or space?"
+        ],
+        spirit: [
+          "What felt meaningful today, even if it was very small?",
+          "Where did you feel connected—to yourself, another person, nature, or something larger?",
+          "What are you being invited to release, and what deserves devotion?",
+          "Did intuition whisper anything before logic stepped in?",
+          "What practice would feel nourishing rather than performative tonight?"
+        ],
+        carry: [
+          "What pattern am I ready to witness without judging it?",
+          "What would support look like if I did not have to earn it?",
+          "Which feeling needs companionship rather than a solution?",
+          "What gives me energy without asking me to abandon myself?",
+          "What did my body know today that my thoughts noticed later?"
+        ]
+      };
+
+      function $(id) { return document.getElementById(id); }
+      function pad(n) { return String(n).padStart(2, "0"); }
+      function isoDate(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+      function norm(deg) { return ((deg % 360) + 360) % 360; }
+      function sin(d) { return Math.sin(d * Math.PI / 180); }
+      function cos(d) { return Math.cos(d * Math.PI / 180); }
+
+      // ---- On-device storage ----
+      var storageOk = true;
+      function loadEntries() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          var parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed.map(normalizeImportedEntry) : [];
+        } catch (err) { storageOk = false; return []; }
+      }
+      function saveEntries() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); return true; }
+        catch (err) {
+          storageOk = false;
+          $("storageNote").textContent = "Couldn’t save on this device — export to keep entries";
+          return false;
+        }
+      }
+
+      function sunLongitude(date) {
+        var days = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+        var L = norm(280.46 + .9856474 * days);
+        var g = norm(357.528 + .9856003 * days);
+        return norm(L + 1.915 * sin(g) + .02 * sin(2 * g));
+      }
+
+      function moonLongitude(date) {
+        var days = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86400000;
+        var L = norm(218.316 + 13.176396 * days);
+        var M = norm(134.963 + 13.064993 * days);
+        var D = norm(297.850 + 12.190749 * days);
+        var F = norm(93.272 + 13.229350 * days);
+        return norm(L + 6.289 * sin(M) + 1.274 * sin(2 * D - M) + .658 * sin(2 * D) + .214 * sin(2 * M) - .186 * sin(norm(357.529 + .9856003 * days)) - .114 * sin(2 * F));
+      }
+
+      function moonData(date) {
+        var angle = norm(moonLongitude(date) - sunLongitude(date));
+        var age = angle / 360 * 29.530588853;
+        var illumination = Math.round((1 - cos(angle)) / 2 * 100);
+        var names = ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous", "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"];
+        return { angle: angle, age: age, illumination: illumination, phase: names[Math.floor((angle + 22.5) / 45) % 8], sign: zodiacs[Math.floor(moonLongitude(date) / 30)] };
+      }
+
+      function renderSky() {
+        var md = moonData(now);
+        var sun = zodiacs[Math.floor(sunLongitude(now) / 30)];
+        $("moonPhase").textContent = md.phase;
+        var zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "local time";
+        $("moonDetail").textContent = md.illumination + "% illuminated · calculated " + now.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) + " at " + now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + " " + zone;
+        $("moonSign").textContent = md.sign;
+        $("moonTheme").textContent = themes[md.sign];
+        $("sunSign").textContent = sun;
+        $("sunTheme").textContent = themes[sun];
+        var shadow = Math.round(8 + Math.abs(50 - md.illumination) * .25);
+        $("moonOrb").style.boxShadow = "inset -" + shadow + "px 0 0 var(--surface-2), 0 0 0 1px var(--line)";
+      }
+
+      function randomItem(list) { return list[Math.floor(Math.random() * list.length)]; }
+      function setPrompts() {
+        $("mindQuestion").textContent = randomItem(questionSets.mind);
+        $("bodyQuestion").textContent = randomItem(questionSets.body);
+        $("spiritQuestion").textContent = randomItem(questionSets.spirit);
+        $("carryPrompt").textContent = randomItem(questionSets.carry);
+      }
+
+      function bindRanges() {
+        ["mood", "energy", "clarity", "connection"].forEach(function (id) {
+          $(id).addEventListener("input", function () { $(id + "Out").textContent = this.value; });
+        });
+      }
+
+      function selectedFeelings() {
+        return Array.prototype.slice.call(document.querySelectorAll('input[name="feeling"]:checked')).map(function (el) { return el.value; });
+      }
+
+      function buildEntry() {
+        // Use the moment of saving, so an app left open overnight still dates entries correctly
+        var at = new Date();
+        var md = moonData(at);
+        return {
+          id: Date.now(), date: isoDate(at), displayDate: at.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }),
+          sky: { phase: md.phase, moonSign: md.sign, sunSign: zodiacs[Math.floor(sunLongitude(at) / 30)] },
+          ratings: { mood: +$("mood").value, energy: +$("energy").value, clarity: +$("clarity").value, connection: +$("connection").value },
+          feelings: selectedFeelings(),
+          mind: { question: $("mindQuestion").textContent, answer: $("mindAnswer").value.trim(), thoughts: $("thoughts").value.trim() },
+          body: { question: $("bodyQuestion").textContent, answer: $("bodyAnswer").value.trim(), sleep: $("sleep").value, sleepHours: $("sleepHours").value.trim() },
+          movement: { didMove: $("workedOut").checked, workout: $("workout").value.trim(), duration: $("duration").value.trim(), effect: $("movementEffect").value.trim() },
+          spirit: { question: $("spiritQuestion").textContent, answer: $("spiritAnswer").value.trim() },
+          freewrite: $("freewrite").value.trim()
+        };
+      }
+
+      function textNode(tag, className, text) {
+        var el = document.createElement(tag);
+        if (className) el.className = className;
+        el.textContent = String(text == null ? "" : text);
+        return el;
+      }
+
+      function boundedRating(value) {
+        var number = Number(value);
+        if (!Number.isFinite(number) || number < 1 || number > 10) throw new Error("Invalid rating");
+        return number;
+      }
+
+      function safeText(value, maxLength) {
+        if (value == null) return "";
+        if (typeof value !== "string") throw new Error("Invalid text field");
+        return value.slice(0, maxLength || 20000);
+      }
+
+      function normalizeImportedEntry(raw) {
+        if (!raw || typeof raw !== "object" || !raw.ratings || !raw.sky || !raw.mind || !raw.movement) throw new Error("Invalid entry");
+        return {
+          id: Number.isFinite(Number(raw.id)) ? Number(raw.id) : Date.now(),
+          date: safeText(raw.date, 20), displayDate: safeText(raw.displayDate, 80),
+          sky: { phase: safeText(raw.sky.phase, 40), moonSign: safeText(raw.sky.moonSign, 40), sunSign: safeText(raw.sky.sunSign, 40) },
+          ratings: { mood: boundedRating(raw.ratings.mood), energy: boundedRating(raw.ratings.energy), clarity: boundedRating(raw.ratings.clarity), connection: boundedRating(raw.ratings.connection) },
+          feelings: Array.isArray(raw.feelings) ? raw.feelings.slice(0, 30).map(function (v) { return safeText(v, 60); }) : [],
+          mind: { question: safeText(raw.mind.question), answer: safeText(raw.mind.answer), thoughts: safeText(raw.mind.thoughts) },
+          body: { question: safeText(raw.body && raw.body.question), answer: safeText(raw.body && raw.body.answer), sleep: safeText(raw.body && raw.body.sleep, 80), sleepHours: safeText(raw.body && raw.body.sleepHours, 40) },
+          movement: { didMove: raw.movement.didMove === true, workout: safeText(raw.movement.workout, 200), duration: safeText(raw.movement.duration, 80), effect: safeText(raw.movement.effect) },
+          spirit: { question: safeText(raw.spirit && raw.spirit.question), answer: safeText(raw.spirit && raw.spirit.answer) },
+          freewrite: safeText(raw.freewrite)
+        };
+      }
+
+      function renderEntries() {
+        var timeline = $("timeline");
+        $("entryCount").textContent = entries.length;
+        timeline.replaceChildren();
+        if (!entries.length) {
+          var empty = textNode("div", "empty", "");
+          empty.appendChild(textNode("h2", "", "Your pages will gather here."));
+          empty.appendChild(textNode("p", "", "Add today’s entry, or import a journal file you exported earlier."));
+          timeline.appendChild(empty);
+          $("insightBox").textContent = "Add at least two entries to begin seeing simple patterns.";
+          return;
+        }
+        entries.slice().reverse().forEach(function (e) {
+          var article = textNode("article", "entry", "");
+          var meta = textNode("div", "entry-meta", "");
+          meta.appendChild(textNode("strong", "", e.displayDate || e.date));
+          meta.appendChild(textNode("span", "", e.sky.phase));
+          meta.appendChild(document.createElement("br"));
+          meta.appendChild(textNode("span", "", "Moon in " + e.sky.moonSign));
+          var body = textNode("div", "entry-body", "");
+          var stats = textNode("div", "entry-stats", "");
+          [["Mood", e.ratings.mood], ["Energy", e.ratings.energy], ["Clarity", e.ratings.clarity], ["Connection", e.ratings.connection]].forEach(function (pair) {
+            stats.appendChild(textNode("span", "stat", pair[0] + " " + pair[1] + "/10"));
+          });
+          body.appendChild(stats);
+          body.appendChild(textNode("p", "", e.freewrite || e.mind.thoughts || e.mind.answer || "A quiet page—signals recorded without extra words."));
+          if (e.feelings.length) body.appendChild(textNode("p", "", "Feelings: " + e.feelings.join(", ")));
+          if (e.movement.didMove) body.appendChild(textNode("p", "", "Movement: " + (e.movement.workout || "Yes") + (e.movement.duration ? " · " + e.movement.duration : "")));
+          article.appendChild(meta); article.appendChild(body); timeline.appendChild(article);
+        });
+        renderInsight();
+      }
+
+      function average(key) { return entries.reduce(function (sum, e) { return sum + Number(e.ratings[key] || 0); }, 0) / entries.length; }
+      function renderInsight() {
+        if (entries.length < 2) { $("insightBox").textContent = "One entry is a moment. Add another to begin comparing signals."; return; }
+        var moved = entries.filter(function (e) { return e.movement.didMove; });
+        var text = "Across " + entries.length + " entries, your average mood is " + average("mood").toFixed(1) + " and energy is " + average("energy").toFixed(1) + ". ";
+        if (moved.length && moved.length < entries.length) {
+          var movementMood = moved.reduce(function (s, e) { return s + e.ratings.mood; }, 0) / moved.length;
+          text += "On days with movement, your recorded mood averages " + movementMood.toFixed(1) + ". This is a correlation to notice, not a conclusion.";
+        } else { text += "Keep recording sleep and movement to give the pattern lens more context."; }
+        $("insightBox").textContent = text;
+      }
+
+      function clearForm() {
+        $("journalForm").reset();
+        ["mood", "energy", "clarity", "connection"].forEach(function (id) { $(id).value = 5; $(id + "Out").textContent = "5"; });
+        setPrompts();
+      }
+
+      function download(name, text, type) {
+        var blob = new Blob([text], { type: type });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      document.querySelectorAll(".tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", String(t === tab)); });
+          $("todayPanel").hidden = tab.dataset.tab !== "today";
+          $("lookbackPanel").hidden = tab.dataset.tab !== "lookback";
+        });
+      });
+
+      $("journalForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        entries.push(buildEntry());
+        var saved = saveEntries();
+        renderEntries();
+        $("dataStatus").textContent = saved ? "Entry saved on this device." : "Entry added, but couldn’t be saved here. Export to keep it.";
+        clearForm();
+        document.querySelector('[data-tab="lookback"]').click();
+        window.scrollTo(0, 0);
+      });
+      $("clearForm").addEventListener("click", clearForm);
+      $("newPrompts").addEventListener("click", setPrompts);
+      $("exportJson").addEventListener("click", function () {
+        download("mood-log-journal-" + isoDate(new Date()) + ".json", JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), entries: entries }, null, 2), "application/json");
+        $("dataStatus").textContent = entries.length ? "Journal exported." : "Empty journal exported.";
+      });
+      $("importJson").addEventListener("click", function () { $("fileInput").click(); });
+      $("fileInput").addEventListener("change", function () {
+        var file = this.files && this.files[0]; if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          try {
+            var parsed = JSON.parse(reader.result);
+            if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.entries) || parsed.entries.length > 5000) throw new Error("Invalid journal format");
+            var incoming = parsed.entries.map(normalizeImportedEntry);
+            // Merge with what's already on this device instead of replacing it
+            var known = {};
+            entries.forEach(function (e) { known[e.id] = true; });
+            var added = incoming.filter(function (e) { return !known[e.id]; });
+            entries = entries.concat(added).sort(function (a, b) { return a.id - b.id; });
+            saveEntries(); renderEntries();
+            $("dataStatus").textContent = added.length + " new entr" + (added.length === 1 ? "y" : "ies") + " imported.";
+          } catch (err) { $("dataStatus").textContent = "That file is not a Mood Log journal export."; }
+        };
+        reader.readAsText(file); this.value = "";
+      });
+
+      $("weekday").textContent = now.toLocaleDateString(undefined, { weekday: "long" });
+      $("displayDate").textContent = now.toLocaleDateString(undefined, { month: "long", day: "numeric" });
+      entries = loadEntries();
+      if (!storageOk) $("storageNote").textContent = "Saving is off here — export to keep entries";
+      renderSky(); setPrompts(); bindRanges(); renderEntries();
+
+      // Offline support + install
+      if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+        window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+      }
+    }());
+  </script>
+</body>
+</html>
