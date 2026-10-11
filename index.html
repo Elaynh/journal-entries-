@@ -202,6 +202,16 @@
     .chip.trigger { background: var(--mobilized-soft); }
     .state-badge { display: inline-block; margin: 8px 0 4px; padding: 3px 9px; border-radius: 999px; background: var(--state-soft); color: var(--ink); font-size: .78rem; font-weight: 600; box-shadow: inset 3px 0 0 var(--state); }
 
+    .wisdom-quote { margin: 0 0 10px; padding-left: 14px; border-left: 2px solid var(--accent); font: 400 1.35rem/1.35 "Libre Caslon Display", Georgia, serif; }
+    .wisdom-who { margin-bottom: 16px; color: var(--muted); font-size: .86rem; }
+    .wisdom-who strong { color: var(--ink); font-weight: 600; }
+    .wisdom-idea { margin-bottom: 12px; }
+    .wisdom-practice { margin-bottom: 14px; padding: 13px 15px; background: var(--surface-2); border-radius: 3px; font-size: .93rem; }
+    .wisdom-practice strong { display: block; margin-bottom: 3px; color: var(--muted); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }
+    .wisdom-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .wisdom-head .button { flex: none; padding: 7px 11px; font-size: .84rem; }
+    .entry-wisdom { margin-bottom: 12px; padding-left: 12px; border-left: 2px solid var(--line); color: var(--muted); font-size: .9rem; }
+
     .regulate-intro { max-width: 680px; margin-bottom: 20px; }
     .regulate-intro h2 { margin-bottom: 8px; font: 400 2.2rem/1.05 "Libre Caslon Display", Georgia, serif; }
     .regulate-intro p { color: var(--muted); }
@@ -400,6 +410,20 @@
             <div class="question-card"><p id="spiritQuestion"></p><textarea class="answer" id="spiritAnswer" placeholder="There is no correct spiritual answer..."></textarea></div>
           </section>
 
+          <section class="form-section" id="wisdom">
+            <div class="wisdom-head">
+              <h3>Wisdom for today</h3>
+              <button class="button" type="button" id="wisdomNext">Another thinker</button>
+            </div>
+            <p class="hint" id="wisdomHint">Chosen for the state you checked in with.</p>
+            <blockquote class="wisdom-quote" id="wisdomQuote"></blockquote>
+            <p class="wisdom-who" id="wisdomWho"></p>
+            <p class="wisdom-idea" id="wisdomIdea"></p>
+            <div class="wisdom-practice"><strong>Try this</strong><span id="wisdomPractice"></span></div>
+            <label class="field-label" for="wisdomReflection">Your response</label>
+            <textarea id="wisdomReflection" class="answer" placeholder="What does this stir in you today?"></textarea>
+          </section>
+
           <section class="form-section">
             <h3>Close the page</h3>
             <label class="field-label" for="freewrite">What else is true right now?</label>
@@ -543,6 +567,131 @@
 
       // Regulation practices. Breath practices use `pattern` ([label, seconds, pacer size]);
       // guided practices use `steps`, spread evenly across `time` seconds.
+      // Philosophy cards. `quote` is verbatim from the named source (translations noted);
+      // `states` says which nervous system states the idea tends to help with.
+      var wisdom = [
+        { who: "Epictetus", tradition: "Stoic", source: "Enchiridion 1 (trans.)", states: ["mobilized"],
+          quote: "Some things are in our control and others not.",
+          idea: "Most suffering comes from gripping things we can't control while neglecting the things we can: our attention, our choices, our responses.",
+          practice: "Write today's worries in two columns: in my control, not in my control. Choose one thing from the first column to act on." },
+        { who: "Epictetus", tradition: "Stoic", source: "Enchiridion 5 (trans.)", states: ["mobilized", "safe"],
+          quote: "Men are disturbed not by the things which happen, but by the opinions about the things.",
+          idea: "Between an event and your distress there's a story. Seeing the story doesn't make the event okay, but it can loosen its grip.",
+          practice: "Pick one thing that upset you. Write what actually happened, then separately, the story you told yourself about it." },
+        { who: "Marcus Aurelius", tradition: "Stoic", source: "Meditations 4.3 (trans.)", states: ["mobilized"],
+          quote: "Nowhere can man find a quieter or more untroubled retreat than in his own soul.",
+          idea: "An emperor in the middle of war and plague kept a private notebook to return to himself. Rest is available inside you, not only on vacation.",
+          practice: "Close your eyes for one minute. Picture a quiet room inside you. What's in it?" },
+        { who: "Marcus Aurelius", tradition: "Stoic", source: "Meditations 5.1 (trans. Gregory Hays)", states: ["shutdown"],
+          quote: "At dawn, when you have trouble getting out of bed, tell yourself: \u201cI have to go to work \u2014 as a human being.\u201d",
+          idea: "Even Marcus struggled to get up. He didn't shame himself; he reminded himself what he was for.",
+          practice: "Name one small thing you can do today simply because you're a person who cares: a dish washed, a message sent, a walk outside." },
+        { who: "Marcus Aurelius", tradition: "Stoic", source: "Meditations 7.8 (trans. George Long)", states: ["mobilized"],
+          quote: "Let not future things disturb thee, for thou wilt come to them, if it shall be necessary, having with thee the same reason which now thou usest for present things.",
+          idea: "Anxiety rehearses a future you'll face with fewer resources than you'll actually have. You'll meet tomorrow with tomorrow's strength.",
+          practice: "Write one future worry, then: \u201cWhen I get there, I'll have ___ to help me.\u201d" },
+        { who: "Seneca", tradition: "Stoic", source: "Letters to Lucilius 13 (trans. Gummere)", states: ["mobilized"],
+          quote: "We suffer more often in imagination than in reality.",
+          idea: "The nervous system reacts to imagined threats as if they were here now. Noticing the difference is the first step to settling.",
+          practice: "Ask: is this happening right now, in this room? Name three things that are actually true in this moment." },
+        { who: "Seneca", tradition: "Stoic", source: "On the Shortness of Life 1 (trans. Basore)", states: ["safe", "shutdown"],
+          quote: "Life is long if you know how to use it.",
+          idea: "We don't lack time so much as we give it away without noticing. Attention is how you spend your life.",
+          practice: "Choose ten minutes today to spend on something that genuinely matters to you, and protect them." },
+        { who: "Lao Tzu", tradition: "Taoist", source: "Tao Te Ching 8 (trans.)", states: ["mobilized", "safe"],
+          quote: "The highest good is like water.",
+          idea: "Water doesn't fight. It yields, flows around obstacles, settles into low places, and still wears down stone.",
+          practice: "Where are you forcing today? Try doing one thing with half the effort and see what happens." },
+        { who: "Lao Tzu", tradition: "Taoist", source: "Tao Te Ching 15 (trans. Stephen Mitchell)", states: ["mobilized"],
+          quote: "Do you have the patience to wait till your mud settles and the water is clear?",
+          idea: "Stirred-up water clears when you stop stirring it. Some decisions are better made once your body has settled.",
+          practice: "Is there a decision you can wait on until you feel calmer? Give yourself permission to wait." },
+        { who: "Lao Tzu", tradition: "Taoist", source: "Tao Te Ching 64 (trans.)", states: ["shutdown"],
+          quote: "A journey of a thousand miles begins with a single step.",
+          idea: "When you're shut down, big goals feel impossible. The nervous system comes back online through small, doable movements.",
+          practice: "What is the smallest possible first step? Make it so small it feels almost silly, then do it." },
+        { who: "Thich Nhat Hanh", tradition: "Zen Buddhist", source: "Stepping into Freedom", states: ["mobilized", "shutdown"],
+          quote: "Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.",
+          idea: "You are not your feelings. You are the sky they move through. The breath is always here to come back to.",
+          practice: "Take three slow breaths. With each one, silently name what's passing through: \u201cworry,\u201d \u201ctiredness,\u201d \u201chope.\u201d" },
+        { who: "Thich Nhat Hanh", tradition: "Zen Buddhist", source: "Peace Is Every Step", states: ["safe", "mobilized"],
+          quote: "Breathing in, I calm my body. Breathing out, I smile.",
+          idea: "A gentle smile, even a small one, signals safety to your own nervous system. Calm can start from the body, not the mind.",
+          practice: "Repeat the verse for five breaths. Let the smile be tiny and real." },
+        { who: "The Buddha", tradition: "Buddhist", source: "Dhammapada 1 (trans. Buddharakkhita)", states: ["safe", "mobilized"],
+          quote: "Mind precedes all mental states. Mind is their chief; they are all mind-wrought.",
+          idea: "How we meet experience shapes what it becomes. Training the mind is a slow, compassionate practice, not a fix.",
+          practice: "Notice one recurring thought today. Don't argue with it. Just say, \u201cAh, there you are again.\u201d" },
+        { who: "Pema Ch\u00f6dr\u00f6n", tradition: "Tibetan Buddhist", source: "When Things Fall Apart", states: ["shutdown", "mobilized"],
+          quote: "Nothing ever goes away until it has taught us what we need to know.",
+          idea: "Patterns repeat until we turn toward them with curiosity. Hard feelings are messengers, not enemies.",
+          practice: "Think of a pattern that keeps returning. Ask it gently: what are you trying to teach me?" },
+        { who: "Viktor Frankl", tradition: "Existential psychology", source: "Man's Search for Meaning", states: ["shutdown", "mobilized"],
+          quote: "When we are no longer able to change a situation, we are challenged to change ourselves.",
+          idea: "Frankl survived the concentration camps and found that meaning could survive even there. Some things can't be fixed, only met.",
+          practice: "Name one situation you can't change. What would it look like to meet it in a way you'd be proud of?" },
+        { who: "Viktor Frankl", tradition: "Existential psychology", source: "Man's Search for Meaning", states: ["shutdown"],
+          quote: "Everything can be taken from a man but one thing: the last of the human freedoms \u2014 to choose one's attitude in any given set of circumstances, to choose one's own way.",
+          idea: "Even when choices feel very small, a choice remains. Noticing it can bring a little life back.",
+          practice: "Find one small choice available to you right now, and make it on purpose." },
+        { who: "Friedrich Nietzsche", tradition: "Existentialist", source: "Twilight of the Idols (trans.)", states: ["shutdown"],
+          quote: "He who has a why to live can bear almost any how.",
+          idea: "Purpose doesn't remove pain, but it makes pain bearable. Your why can be small: a person, a creature, a project, a morning.",
+          practice: "Write down three \u201cwhys,\u201d big or tiny, that keep you going." },
+        { who: "Baruch Spinoza", tradition: "Rationalist", source: "Ethics, Part V, Prop. 3 (trans. Elwes)", states: ["mobilized", "safe"],
+          quote: "An emotion, which is a passion, ceases to be a passion, as soon as we form a clear and distinct idea thereof.",
+          idea: "Understanding an emotion (where it came from, what it's protecting) changes your relationship to it. Naming is a form of regulation.",
+          practice: "Trace one feeling back: when did it start? What happened just before? What does it want?" },
+        { who: "William James", tradition: "Pragmatist psychology", source: "The Principles of Psychology, ch. 11", states: ["safe", "mobilized"],
+          quote: "My experience is what I agree to attend to.",
+          idea: "The father of American psychology saw attention as the steering wheel of a life. What you practice noticing grows.",
+          practice: "For the rest of today, deliberately notice glimmers. Write down every one you catch." },
+        { who: "Epicurus", tradition: "Epicurean", source: "Principal Doctrines 27 (trans.)", states: ["shutdown", "safe"],
+          quote: "Of all the means which wisdom acquires to ensure happiness throughout the whole of life, by far the most important is friendship.",
+          idea: "Epicurus built a garden community, not a palace. Connection is one of the most powerful regulators we have.",
+          practice: "Reach out to one person today, even with a single sentence." },
+        { who: "Epicurus", tradition: "Epicurean", source: "Vatican Sayings 35 (trans.)", states: ["safe", "mobilized"],
+          quote: "Do not spoil what you have by desiring what you have not; remember that what you now have was once among the things you only hoped for.",
+          idea: "Wanting can crowd out the good already here. Gratitude isn't denial; it's noticing.",
+          practice: "Name three things you have now that you once hoped for." },
+        { who: "S\u00f8ren Kierkegaard", tradition: "Existentialist", source: "The Concept of Anxiety", states: ["mobilized"],
+          quote: "Anxiety is the dizziness of freedom.",
+          idea: "Anxiety often shows up when many possibilities open at once. It can be a sign that you're standing at the edge of choice, not that something is wrong.",
+          practice: "If your anxiety is pointing at a choice, what is the choice?" },
+        { who: "S\u00f8ren Kierkegaard", tradition: "Existentialist", source: "Journals, 1843", states: ["safe", "shutdown"],
+          quote: "Life can only be understood backwards; but it must be lived forwards.",
+          idea: "You don't need to understand everything to take the next step. Clarity often comes after.",
+          practice: "Look back at a hard time that makes more sense now. What did you not know then?" },
+        { who: "Albert Camus", tradition: "Absurdist", source: "Return to Tipasa (trans.)", states: ["shutdown"],
+          quote: "In the midst of winter, I found there was, within me, an invincible summer.",
+          idea: "Under the numbness, something warm is still there. Shutdown is protection, not the truth of who you are.",
+          practice: "Recall one moment of warmth: a place, a song, a person. Stay with the memory for a few breaths." },
+        { who: "Albert Camus", tradition: "Absurdist", source: "The Myth of Sisyphus (trans.)", states: ["shutdown", "safe"],
+          quote: "One must imagine Sisyphus happy.",
+          idea: "Even repetitive, uphill days can hold meaning when we stop waiting for them to be different and inhabit them fully.",
+          practice: "Choose one repetitive task today and do it with full attention, as if it were the whole point." },
+        { who: "Simone Weil", tradition: "Mystic philosopher", source: "Letter to Jo\u00eb Bousquet", states: ["safe"],
+          quote: "Attention is the rarest and purest form of generosity.",
+          idea: "Being truly attended to is regulating. So is attending, to another person or to yourself.",
+          practice: "Give someone (or yourself) five minutes of undivided attention today. No phone." },
+        { who: "Michel de Montaigne", tradition: "Renaissance essayist", source: "Essays III.13, \u201cOf Experience\u201d (trans.)", states: ["mobilized", "safe"],
+          quote: "When I dance, I dance; when I sleep, I sleep.",
+          idea: "Montaigne practiced being fully where he was. Doing one thing at a time is a quiet act of regulation.",
+          practice: "Choose one ordinary activity (eating, walking, washing) and do only that." },
+        { who: "Rumi", tradition: "Sufi poet", source: "\u201cThe Guest House\u201d (trans. Coleman Barks)", states: ["mobilized", "shutdown"],
+          quote: "This being human is a guest house. Every morning a new arrival.",
+          idea: "Rumi invites us to welcome every feeling, even the unwelcome ones, as visitors with something to bring.",
+          practice: "Name today's \u201cguest.\u201d What might it have come to tell you?" },
+        { who: "Bhagavad Gita", tradition: "Hindu scripture", source: "Chapter 2, verse 47 (trans.)", states: ["mobilized"],
+          quote: "You have a right to your actions, but never to the fruits of your actions.",
+          idea: "Doing your part fully while releasing the outcome takes pressure off the nervous system. Effort is yours; results aren't.",
+          practice: "Name one thing you're anxious about the outcome of. Write what your part is, and let the rest be." },
+        { who: "Alan Watts", tradition: "Interpreter of Eastern philosophy", source: "The Wisdom of Insecurity", states: ["mobilized", "safe"],
+          quote: "The only way to make sense out of change is to plunge into it, move with it, and join the dance.",
+          idea: "Resisting change keeps the body braced. Moving with it, even a little, lets the bracing soften.",
+          practice: "Put on one song and move however your body wants for its whole length." }
+      ];
+
       var practices = [
         { id: "sigh", name: "Physiological sigh", for: ["mobilized"], time: 60,
           why: "Two inhales re-open the lungs, then a long exhale slows the heart. One of the quickest ways to bring stress down.",
@@ -721,6 +870,7 @@
           body: { question: $("bodyQuestion").textContent, answer: $("bodyAnswer").value.trim(), sleep: $("sleep").value, sleepHours: $("sleepHours").value.trim() },
           movement: { didMove: $("workedOut").checked, workout: $("workout").value.trim(), duration: $("duration").value.trim(), effect: $("movementEffect").value.trim() },
           spirit: { question: $("spiritQuestion").textContent, answer: $("spiritAnswer").value.trim() },
+          wisdom: (function (w) { return { who: w.who, quote: w.quote, source: w.source, practice: w.practice, reflection: $("wisdomReflection").value.trim() }; }(currentWisdom())),
           freewrite: $("freewrite").value.trim()
         };
       }
@@ -757,6 +907,9 @@
           body: { question: safeText(raw.body && raw.body.question), answer: safeText(raw.body && raw.body.answer), sleep: safeText(raw.body && raw.body.sleep, 80), sleepHours: safeText(raw.body && raw.body.sleepHours, 40) },
           movement: { didMove: raw.movement.didMove === true, workout: safeText(raw.movement.workout, 200), duration: safeText(raw.movement.duration, 80), effect: safeText(raw.movement.effect) },
           spirit: { question: safeText(raw.spirit && raw.spirit.question), answer: safeText(raw.spirit && raw.spirit.answer) },
+          wisdom: raw.wisdom && typeof raw.wisdom === "object"
+            ? { who: safeText(raw.wisdom.who, 120), quote: safeText(raw.wisdom.quote, 1000), source: safeText(raw.wisdom.source, 200), practice: safeText(raw.wisdom.practice, 1000), reflection: safeText(raw.wisdom.reflection) }
+            : null,
           freewrite: safeText(raw.freewrite)
         };
       }
@@ -825,6 +978,12 @@
           if (e.nervous.triggers.length) { body.appendChild(textNode("p", "hint small", "Triggers")); body.appendChild(chipRow(e.nervous.triggers, "trigger")); }
           body.appendChild(textNode("p", "", e.freewrite || e.mind.thoughts || e.mind.answer || "A quiet page—signals recorded without extra words."));
           if (e.feelings.length) body.appendChild(textNode("p", "", "Feelings: " + e.feelings.join(", ")));
+          if (e.wisdom && e.wisdom.reflection) {
+            var wq = textNode("div", "entry-wisdom", "");
+            wq.appendChild(textNode("p", "", "\u201c" + e.wisdom.quote + "\u201d \u2014 " + e.wisdom.who));
+            wq.appendChild(textNode("p", "", e.wisdom.reflection));
+            body.appendChild(wq);
+          }
           if (e.movement.didMove) body.appendChild(textNode("p", "", "Movement: " + (e.movement.workout || "Yes") + (e.movement.duration ? " · " + e.movement.duration : "")));
           article.appendChild(meta); article.appendChild(body); timeline.appendChild(article);
         });
@@ -865,6 +1024,7 @@
         $("journalForm").reset();
         ["mood", "energy", "clarity", "connection", "windowTol"].forEach(function (id) { $(id).value = 5; $(id + "Out").textContent = "5"; });
         $("stateSuggest").hidden = true;
+        wisdomOffset = 0; renderWisdom();
         setPrompts();
       }
 
@@ -1098,6 +1258,30 @@
         renderWorks();
       }
 
+      // ---- Wisdom card ----
+      var wisdomOffset = 0;
+      function dayNumber(d) { return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86400000); }
+      function wisdomPool() {
+        var state = checkedValue("nsState");
+        return state ? wisdom.filter(function (w) { return w.states.indexOf(state) !== -1; }) : wisdom;
+      }
+      // Same card all day for a given state; "Another thinker" steps through the rest
+      function currentWisdom() {
+        var pool = wisdomPool();
+        return pool[((dayNumber(new Date()) + wisdomOffset) % pool.length + pool.length) % pool.length];
+      }
+      function renderWisdom() {
+        var w = currentWisdom();
+        var state = checkedValue("nsState");
+        $("wisdomHint").textContent = state ? "Chosen for feeling " + STATES[state].name.toLowerCase() + "." : "Check in with your nervous system above and this will be chosen to match.";
+        $("wisdomQuote").textContent = "\u201c" + w.quote + "\u201d";
+        $("wisdomWho").replaceChildren();
+        $("wisdomWho").appendChild(textNode("strong", "", w.who));
+        $("wisdomWho").appendChild(document.createTextNode(" \u00b7 " + w.tradition + " \u00b7 " + w.source));
+        $("wisdomIdea").textContent = w.idea;
+        $("wisdomPractice").textContent = w.practice;
+      }
+
       function updateSuggestion() {
         var state = checkedValue("nsState");
         var box = $("stateSuggest");
@@ -1117,7 +1301,10 @@
         box.hidden = false;
       }
 
-      document.querySelectorAll('input[name="nsState"]').forEach(function (el) { el.addEventListener("change", updateSuggestion); });
+      document.querySelectorAll('input[name="nsState"]').forEach(function (el) {
+        el.addEventListener("change", function () { updateSuggestion(); wisdomOffset = 0; renderWisdom(); });
+      });
+      $("wisdomNext").addEventListener("click", function () { wisdomOffset += 1; renderWisdom(); });
       $("sessionBegin").addEventListener("click", beginPractice);
       $("sessionFinish").addEventListener("click", finishPractice);
       $("stepNext").addEventListener("click", function () {
@@ -1132,7 +1319,7 @@
       entries = loadList(STORAGE_KEY, normalizeImportedEntry);
       sessions = loadList(REG_KEY, normalizeSession);
       if (!storageOk) $("storageNote").textContent = "Saving is off here — export to keep entries";
-      renderSky(); setPrompts(); bindRanges(); renderEntries(); renderPractices(); renderWorks();
+      renderSky(); setPrompts(); bindRanges(); renderEntries(); renderPractices(); renderWorks(); renderWisdom();
 
       // Offline support + install
       if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {

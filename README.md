@@ -7,6 +7,8 @@ A guided daily journal for all aspects of my life: mood, mind, body, sleep, move
 - **Today:** a daily check-in. It starts with your nervous system state (safe & connected, mobilized,
   or shut down), your window of tolerance, and your glimmers and triggers. Then come mood ratings,
   feelings, mind, body, movement, spirit, and free writing.
+- **Wisdom for today:** a philosopher card chosen for the state you checked in with (Stoics, Taoism,
+  Buddhism, existentialists, Rumi, and more), with a small practice and space to respond.
 - **Regulate:** short guided practices (breathing, orienting, butterfly hug, and more). You rate how
   settled you feel before and after, and "What works for you" ranks the practices by how much they
   actually help.
